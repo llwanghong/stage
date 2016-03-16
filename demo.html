@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html> 
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1, maximum-scale=1" />
+  <title>Stage连贯动画框架Demo</title>
+  <!--[if lt IE 9]>
+    <script>
+      var e = ("abbr,article,aside,audio,canvas,datalist,details," +
+        "figure,footer,header,hgroup,mark,menu,meter,nav,output," +
+        "progress,section,time,video").split(',');
+      for (var i = 0; i < e.length; i++) {
+        document.createElement(e[i]);
+      }
+    </script>
+  <![endif]-->
+  <link href="stage.css" rel="stylesheet" />
+
+  <style type="text/css">
+    #stage {
+      position   : relative;
+      margin     : 0 auto;
+      width      : 400px;
+      height     : 600px;
+      overflow   : hidden;
+      visibility : hidden;
+    }
+
+    #scene1, #scene2, #scene3,
+    #scene4, #scene5, #scene6 {
+      color       : #666;
+      font-size   : 14px;
+      text-align  : center;
+      line-height : 20px;
+      background-color  : #fff;
+      background-repeat : no-repeat;
+    }
+
+    #scene1 { background-color: #9ce8f6; }
+    #scene2 { background-color: #ffd0d8; }
+    #scene3 { background-color: #fccef9; }
+    #scene4 { background-color: #d0ddfc; }
+    #scene5 { background-color: #f0ed9b; }
+    #scene6 { background-color: #fed4c4; }
+
+    #scene1 span, #scene2 span,
+    #scene3 span, #scene4 span {
+      position  : absolute;
+      font-size : 20px;
+    }
+
+    #scene1 span {
+      top   : 8px;
+      left  : 8px;
+      color : rgb(131, 189, 187);
+    }
+
+    #scene2 span {
+      bottom : 8px;
+      right  : 8px;
+      color  : rgb(204, 162, 169);
+    }
+
+    #scene3 span {
+      bottom : 8px;
+      right  : 8px;
+      color  : rgb(202, 166, 199);
+    }
+
+    #scene4 span {
+      top   : 8px;
+      right : 8px;
+      color : rgb(186, 193, 208);
+    }
+
+    #scene1 .actor1 {
+      position    : absolute;
+      top         : 50%;
+      left        : 50%;
+      width       : 180px;
+      height      : 100px;
+      margin-left : -90px;
+      line-height : 100px;
+      font-weight : bold;
+      font-size   : 18px;
+      background  : #5ae8a3;
+    }
+
+    #scene2 .actor1, #scene2 .actor2, #scene2 .actor3,
+    #scene3 .actor1, #scene3 .actor2, #scene3 .actor3 {
+      position    : absolute;
+      font-weight : bold;
+    }
+
+    #scene2 .actor1, #scene3 .actor1 {
+      left        : -10%;
+      width       : 120%;
+      height      : 80px;
+      line-height : 80px;
+      font-size   : 18px;
+      background  : #FF686C;
+      transform   : rotate(-10deg);
+    }
+
+    #scene2 .actor2, #scene3 .actor2 {
+      width       : 80px;
+      height      : 260px;
+      line-height : 260px;
+      font-size   : 16px;
+      background  : bisque;
+    }
+
+    #scene2 .actor3, #scene3 .actor3 {
+      width       : 180px;
+      height      : 180px;
+      line-height : 180px;
+      font-size   : 16px;
+      background  : ivory;
+    }
+
+    #scene2 .actor1 {
+      top : 70%;
+    }
+
+    #scene2 .actor2 {
+      top   : 13%;
+      right : 10%;
+    }
+
+    #scene2 .actor3 {
+      top  : 20%;
+      left : 10%;
+    }
+
+    #scene3 .actor1 {
+      top : 15%;
+    }
+
+    #scene3 .actor2 {
+      bottom : 13%;
+      left   : 10%;
+    }
+
+    #scene3 .actor3 {
+      bottom : 20%;
+      right  : 10%;
+    }
+
+    #scene4 .actor1, #scene4 .actor2, #scene4 .actor3,
+    #scene4 .actor4, #scene4 .actor5, #scene4 .actor6 {
+      position    : absolute;
+      width       : 70px;
+      height      : 70px;
+      line-height : 70px;
+      font-weight : bold;
+      font-size   : 16px;
+      transform   : rotate(-45deg);
+    }
+
+    #scene4 .actor1, #scene4 .actor2, #scene4 .actor3 {
+      top        : 15%;
+      background : #FF686C;
+    }
+
+    #scene4 .actor4, #scene4 .actor5, #scene4 .actor6 {
+      bottom     : 50%;
+      background : bisque;
+    }
+
+    #scene4 .actor1 {
+      left : 13%;
+    }
+
+    #scene4 .actor2 {
+      left : 42%;
+    }
+
+    #scene4 .actor3 {
+      right : 13%;
+    }
+
+    #scene4 .actor4 {
+      left : 13%;
+    }
+
+    #scene4 .actor5 {
+      left : 42%;
+    }
+
+    #scene4 .actor6 {
+      right : 13%;
+    }
+
+    #scene4 .actor7 {
+      position    : absolute;
+      bottom      : 10%;
+      right       : 26%;
+      width       : 200px;
+      height      : 180px;
+      font-weight : bold;
+      font-size   : 16px;
+      line-height : 180px;
+      background  : ivory;
+    }
+
+    .rY { transform: rotate(25deg); }
+  </style>
+</head>
+<body>
+  <div id="stage" animate-opts='{"loop": true, "noload": true}'>
+    <div id="scene1" class="scene">
+      <span>Scene1</span>
+      <section class="actor actor1" animate-opts='{rotate: -540, scaleX: -1.5, scaleY: -1.5, translateY: 200, "effect": {"default": "Back.easeOut"}, duration: 800}'>Actor1</section>
+    </div>
+    <div id="scene2" class="scene" animate-opts='{"dir": "l2r"}'>
+      <span>Scene2</span>
+      <section class="actor actor1" animate-opts='{fadeIn: true, dir: "b2t", duration: 450}'>Actor1</section>
+      <section class="actor actor2" animate-opts='{"dir": "t2b", duration: 1000}'>Actor2</section>
+      <section class="actor actor3" animate-opts='{translateY: 0, fadeIn: true, duration: 450, delay: 1300}'>Actor3</section>
+    </div>
+    <div id="scene3" class="scene">
+      <span>Scene3</span>
+      <section class="actor actor1" animate-opts='{fadeIn: true, dir: "t2b", duration: 450}'>Actor1</section>
+      <section class="actor actor2" animate-opts='{"dir": "l2r", duration: 1000}'>Actor2</section>
+      <section class="actor actor3" animate-opts='{translateY: 0, zoomIn: true, duration: 450, delay: 1300}'>Actor3</section>
+    </div>
+    <div id="scene4" class="scene" animate-opts='{"dir": "b2t", "effect": "Bounce.easeOut", "replay": true}'>
+      <span>Scene4</span>
+      <section class="actor actor1" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 500}'>Actor1</section>
+      <section class="actor actor2" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor2</section>
+      <section class="actor actor3" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor3</section>
+      <section class="actor actor4" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 500}'>Actor4</section>
+      <section class="actor actor5" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor5</section>
+      <section class="actor actor6" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor6</section>
+      <section class="actor actor7" animate-opts='{fadeIn: true, zoomIn: true, duration: 1000, delay: 2000, "effect": "Bounce.easeOut", endStyle: "rY"}'>Actor7</section>
+    </div>
+  </div>
+
+  <script src="stage.util.js"></script>
+  <script src="stage.js"></script>
+  <script type="text/javascript">
+    var stage = new Stage(util("#stage"));
+    stage.play();
+  </script>
+</body>
+</html>
