@@ -73,10 +73,13 @@ Stage是通过在DOM节点上添加额外的**animate-opts**属性来实现动�
 |参数名称 |参数说明                  | 参数类型 |可选值    | 默认值 |
 |:-----:|:------------------------|:------:|:--------:| :----:|
 |**noload** |动画舞台中是否使用加载页 | *boolean* |*true,false*| *false* |
+|**showIntervals** |跨动画场景切换时是否显示中间场景 | *boolean* |*true,false*| *false* |
+|**duration** |动画场景动画的持续时间 | *number* |*整型(单位毫秒)* |*50* |
+|**ratio** |跨动画场景切换时，持续时间的倍因子 | *number* |*浮点型* |*0.55* |
+|**freeze** |是否冻结所有场景及演员的动画 | *boolean* |*true,false*| *false* |
 |**loop** |动画舞台中场景是否可循环播放 | *boolean* |*true,false*| *false* |
 |**bind** |是否绑定默认的鼠标swipe操作 | *boolean* |*true,false*| *true* |
 |**sceneClass** |用于获取各个动画场景的class名称| *string* |*合法的CSS类名*| *"scene"* |
-
 **使用方法示例：**
 下面例子中定义了一个动画舞台，循环播放各个场景
 ``` javascript
@@ -87,11 +90,11 @@ Stage是通过在DOM节点上添加额外的**animate-opts**属性来实现动�
 ```
 >动画舞台Stage默认已经绑定了鼠标的swipe操作（即*bind*参数默认为true），鼠标上下拖拽即可进行动画场景的切换。通过将*bind*参数设为false，可以取消这一默认绑定，此时可以通过动画舞台Stage对外提供的实例接口来灵活实现期望的动画场景切换效果。Stage类对外提供的实例接口如下表。
 >|接口名称 |接口参数| 接口说明 |
->|:--------:|:-------|:------|
->|**cur** || 获取当前动画场景的索引，从0开始 |
->|**prev** |[index] | 向上切换到指定索引的动画场景，不指定index将默认切换到上一个动画场景 |
->|**next** |[index] | 向下切换到指定索引的动画场景，不指定index将默认切换到下一个动画场景 |
->|**play** |[direction]|可选参数为动画场景切换方向，控制当前场景和下一个场景将如何进入动画舞<br/>台，可取值为"prev"或"next"，如果不传递该参数的话，默认切换方向为"next"|
+|:--------:|:-------|:------|
+|**cur** || 获取当前动画场景的索引，从0开始 |
+|**prev** |[index] | 向上切换到指定索引的动画场景，不指定index将默认切换到上一个动画场景 |
+|**next** |[index] | 向下切换到指定索引的动画场景，不指定index将默认切换到下一个动画场景 |
+|**play** |[direction]|可选参数为动画场景切换方向，控制当前场景和下一个场景将如何进入动画舞<br/>台，可取值为"prev"或"next"，如果不传递该参数的话，默认切换方向为"next"|
 
 #### 2. Scene的配置。
 **可用参数列表：**
@@ -100,6 +103,7 @@ Stage是通过在DOM节点上添加额外的**animate-opts**属性来实现动�
 |**dir**     |动画场景进行动画切换的方向        | *string*  |*"t2b","b2t","l2r","r2l"*| *"t2b"*  |
 |**replay**  |动画场景切换时，演员动画是否重复播放| *boolean* |*true,false*            | *true*   |
 |**effect**  |动画场景切换的动画效果            | *string*  |*见下面注释*             |*"Linear"*|
+|**freeze** |是否冻结场景中所有动画演员的动画 | *boolean* |*true,false*| *false* |
 |**klass**|用于向动画场景添加样式的class名称| *string* |*合法的CSS类名*| *""* |
 |**actorClass**|用于获取各个动画演员的class名称| *string* |*合法的CSS类名*| *"actor"* |
 >动画效果*effect*主要包括：*Linear, Quart.{easeIn,,easeOut},easeInOut}, Back.{easeIn,easeOut,easeInOut}, Bounce.{easeIn,easeOut,easeInOut}, Elastic.{easeIn,easeOut,easeInOut}, 如果effect是以对象的形式给出的话，则可以给animate-opts参数中各属性添加自己的动画效果，比如"effect": {"default": "Back.easeOut", "opacity": "Linear", "scaleX": "Linear", "translateX": "Linear"}，对于未指定效果的参数则采用default指定的动画效果，如果未指定default效果，则采用线性效果*。
@@ -155,5 +159,5 @@ Stage是通过在DOM节点上添加额外的**animate-opts**属性来实现动�
 ```
 ---------
 ### 反馈与建议
-感谢阅读这份Stage动画框架的帮助文档。使用过程中如有任何问题，请联系作者。
+感谢阅读这份Stage动画库的帮助文档。使用过程中如有任何问题，请联系作者。
 - Email：<llwanghong@gmail.com>
