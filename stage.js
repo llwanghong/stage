@@ -30,8 +30,8 @@
     // save real DOM node for the actor
     this.node = actor;
 
-    // timerId for animation of each actor
-    this.timerId = -1;
+    // timer for animation of each actor
+    this.timer = {id: -1};
 
     // actor animation options
     // 
@@ -41,6 +41,8 @@
     // delay      - actor needs waitting for [delay] ms to perform the animation, default is 0.
     // fadeIn     - control whether the element is fade in.
     // zoomIn     - control whether the element is zoom in.
+    // scaleX     - control the initial scaleX for the element
+    // scaleY     - control the initial scaleY for the element
     // translateX - offset specified by the user relate to the horizontal direction.
     // translateY - offset specified by the user relate to the vertical direction.
     // beginX     - css attributes of the element at the begining of the animation
@@ -144,6 +146,7 @@
   proto.play = function () {
     var info,
       opts = this.opts,
+      scene     = this.scene,
       duration  = opts.duration || 1000,   // the time period to perform the animation
       interval  = 10,                      // step interval between each animation is 10ms
       steps     = duration / interval,     // total steps to finish the animation
@@ -212,8 +215,8 @@
     // actor animation execution
     if (opts.delay) {
       delay = parseInt(opts.delay);
-      that.timerId = window.setTimeout(function () {
-        that.timerId = $.fn.animate(
+      that.timer.id = window.setTimeout(function () {
+        that.timer = $.fn.animate(
           animInfo.begin,
           animInfo.end, 
           steps, 
@@ -253,7 +256,7 @@
         );
       }, delay);
     } else {
-      that.timerId = $.fn.animate(
+      that.timer = $.fn.animate(
         animInfo.begin,
         animInfo.end,
         steps,
@@ -341,15 +344,19 @@
       actor = new Actor($(actors[i]));
       actor.index = i;
       actor.scene = this;
+      actor.stage = Stage.instance;
+      
+      // need add endStyle when freezed
+      if (Stage.instance.opts.freeze || this.opts.freeze) {
+        actor.opts.endStyle && actor.node.addClass(actor.opts.endStyle);
+      }
+
       this.actors.push(actor);
     }
   }
 
   // add Scene prototype attribute and method
   proto = Scene.prototype;
-
-  // whether there is one scene is animating
-  proto.isanimating = false;
 
   // set/get next Scene
   proto.next = function (scene) {
@@ -380,9 +387,6 @@
   proto.prePlay = function () {
     var i, len, actors, actor, opts, css, match, percent, animInfo;
 
-    // show the DOM node and calculate each actor's dimensions
-    this.node.show();
-
     // if all actors played or no actor, directly return
     if (this.actorsPlayed === true || this.actors.length === 0) { return; }
     // if no replay and once played, directly return
@@ -404,6 +408,10 @@
 
         // calculate the inital angle
         css.transform['rotate'] += opts['deltaAngle'];
+
+        // calculate the inital scaleX/Y
+        css.transform.scaleX += opts['scaleX']*100;
+        css.transform.scaleY += opts['scaleY']*100;
 
         if (opts.fadeIn) {
           css.opacity = 0;
@@ -550,13 +558,17 @@
   // play the Scene
   proto.play = function (swipeDir) {
     var
-      that    = this,
-      stage   = this.stage,
-      cur     = this.stage.curScene,
-      winH    = stage.node.height(),
-      winW    = stage.node.width(),
-      chgLong = winH,
-      isLR, noload, effect, transform;
+      that     = this,
+      stage    = this.stage,
+      cur      = this.stage.curScene,
+      winH     = stage.node.height(),
+      winW     = stage.node.width(),
+      duration = stage.opts.duration,
+      ratio    = stage.opts.ratio,
+      chgLong  = winH,
+      isLR, noload, effect, transform,
+      // variables for show interval scenes
+      i, currentIndex, targetIndex, beginIndex, endIndex, count;
 
     isLR   = that.opts.dir == "l2r" || that.opts.dir == "r2l";
     noload = stage.opts.noload;
@@ -564,46 +576,112 @@
 
     that.stage.isanimating = true;
 
-    if (isLR) {
-      chgLong = winW;
-      if (swipeDir === "prev") {
-        transform = {"transform": {translateX: -chgLong}};
+    if (stage.opts.showIntervals) {
+      beginIndex = currentIndex = cur.index;
+      endIndex = targetIndex = that.index;
+      count = Math.abs(endIndex-beginIndex);
+      if (currentIndex > targetIndex) {
+        beginIndex = targetIndex;
+        endIndex   = currentIndex;
+        swipeDir = 'prev';
       } else {
-        transform = {"transform": {translateX: chgLong}};
-      }
-    } else {
-      if (swipeDir === "prev") {
-        transform = {"transform": {translateY: -chgLong}};
-      } else {
-        transform = {"transform": {translateY: chgLong}};
+        swipeDir = 'next';
       }
     }
-
+    
     if (noload === false) {
-      that.node.css($.fn.obj2CssObj(transform));
-    }
+      // calculate initial position of scenes and show them
+      if (isLR) {
+        chgLong = winW;
+        if (swipeDir === "prev") {
+          if (stage.opts.showIntervals) {
+            for (i = beginIndex; i < endIndex; i++) {
+              stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateX: -(endIndex-i)*chgLong}}));;
+              stage.scenes[i].node.show();
+            }
+          } else {
+            transform = {"transform": {translateX: -chgLong}};
+          }
+        } else {
+          if (stage.opts.showIntervals) {
+            for (i = beginIndex+1; i <= endIndex; i++) {
+              stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateX: (i-beginIndex)*chgLong}}));;
+              stage.scenes[i].node.show();
+            }
+          } else {
+            transform = {"transform": {translateX: chgLong}};
+          }
+        }
+      } else {
+        if (swipeDir === "prev") {
+          if (stage.opts.showIntervals) {
+            for (i = beginIndex; i < endIndex; i++) {
+              stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateY: -(endIndex-i)*chgLong}}));;
+              stage.scenes[i].node.show();
+            }
+          } else {
+            transform = {"transform": {translateY: -chgLong}};
+          }
+        } else {
+          if (stage.opts.showIntervals) {
+            for (i = beginIndex; i <= endIndex; i++) {
+              stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateY: (i-beginIndex)*chgLong}}));;
+              stage.scenes[i].node.show();
+            }
+          } else {
+            transform = {"transform": {translateY: chgLong}};
+          }
+        }
+      }
 
-    if (that.prePlay) {
-      that.prePlay();
-    }
+      if (!stage.opts.showIntervals) {
+        that.node.css($.fn.obj2CssObj(transform));
+        that.node.show();
+      }
 
-    if (noload === false) {
-      $.fn.animate(0, chgLong, 60, function (val) {
+      if (!stage.opts.freeze && !that.opts.freeze) {
+        that.prePlay && that.prePlay();
+      }
+      $.fn.animate(0, stage.opts.showIntervals ? count*chgLong : chgLong, (stage.opts.showIntervals ? (count > 1 ? count*ratio*duration : duration) : duration)/stage.opts.interval, function (val) {
         if (isLR) {
           if (swipeDir === "next") {
-            cur.node.css($.fn.obj2CssObj({"transform": {translateX: -val}}));
-            that.node.css($.fn.obj2CssObj({"transform": {translateX: chgLong-val}}));
+            if (stage.opts.showIntervals) {
+              for (i = beginIndex; i <= endIndex; i++) {
+                stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateX: (i-beginIndex)*chgLong-val}}));;
+              }
+            } else {
+              cur.node.css($.fn.obj2CssObj({"transform": {translateX: -val}}));
+              that.node.css($.fn.obj2CssObj({"transform": {translateX: chgLong-val}}));
+            }
           } else {
-            cur.node.css($.fn.obj2CssObj({"transform": {translateX: val}}));
-            that.node.css($.fn.obj2CssObj({"transform": {translateX: val-chgLong}}));
+            if (stage.opts.showIntervals) {
+              for (i = beginIndex; i <= endIndex; i++) {
+                stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateX: val-(endIndex-i)*chgLong}}));;
+              }
+            } else {
+              cur.node.css($.fn.obj2CssObj({"transform": {translateX: val}}));
+              that.node.css($.fn.obj2CssObj({"transform": {translateX: val-chgLong}}));
+            }
           }
         } else {
           if (swipeDir === "next") {
-            cur.node.css($.fn.obj2CssObj({"transform": {translateY: -val}}));
-            that.node.css($.fn.obj2CssObj({"transform": {translateY: chgLong-val}}));
+            if (stage.opts.showIntervals) {
+              for (i = beginIndex; i <= endIndex; i++) {
+                stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateY: (i-beginIndex)*chgLong-val}}));;
+              }
+            } else {
+              cur.node.css($.fn.obj2CssObj({"transform": {translateY: -val}}));
+              that.node.css($.fn.obj2CssObj({"transform": {translateY: chgLong-val}}));
+            }
           } else {
-            cur.node.css($.fn.obj2CssObj({"transform": {translateY: val}}));
-            that.node.css($.fn.obj2CssObj({"transform": {translateY: val-chgLong}}));
+            if (stage.opts.showIntervals) {
+              for (i = beginIndex; i <= endIndex; i++) {
+                stage.scenes[i].node.css($.fn.obj2CssObj({"transform": {translateY: val-(endIndex-i)*chgLong}}));;
+              }
+            } else {
+              cur.node.css($.fn.obj2CssObj({"transform": {translateY: val}}));
+              that.node.css($.fn.obj2CssObj({"transform": {translateY: val-chgLong}}));
+            }
           }
         }
       }, {
@@ -616,33 +694,39 @@
           if (cur.opts.replay) {
             for (i = 0, len = cur.actors.length; i < len; i++) {
               actor = cur.actors[i];
-              window.clearTimeout(actor.timerId);
+              window.clearTimeout(actor.timer.id);
             }
           }
 
-          if (cur.hidden) {
-            cur.hidden();
+          if (stage.opts.showIntervals) {
+            for (i = beginIndex; i <= endIndex; i++) {
+              if (i != targetIndex) {
+                stage.scenes[i].hidden && stage.scenes[i].hidden();
+              }
+            }
+          } else {
+            cur.hidden && cur.hidden();
           }
 
-          if (that.postPlay) {
-            that.postPlay();
+          if (!stage.opts.freeze && !that.opts.freeze) {
+            that.postPlay && that.postPlay();
           }
 
           // indicate the scene once played
           that.scenePlayed = true;
           cur.scenePlayed = true;
-
-          if (isLR) {
-            that.node.css($.fn.obj2CssObj({"transform": {translateX: 0}}));
-          } else {
-            that.node.css($.fn.obj2CssObj({"transform": {translateY: 0}}));
-          }
+          
         }, effect: effect
       });
     } else {
+      // show the scene
+      that.node.show();
+      if (!stage.opts.freeze && !that.opts.freeze) {
+        that.prePlay && that.prePlay();
+      }
       that.stage.isanimating = false;
-      if (that.postPlay) {
-        that.postPlay();
+      if (!stage.opts.freeze && !that.opts.freeze) {
+        that.postPlay && that.postPlay();
       }
       // indicate the scene once played
       that.scenePlayed = true;
@@ -687,6 +771,25 @@
     } else {
       noload = this.opts.noload = false;
     }
+
+    this.opts.showIntervals = this.opts.showIntervals || false;
+    this.opts.ratio = this.opts.ratio || 0.55;
+    this.opts.duration = this.opts.duration == undefined ? 1000 : this.opts.duration;
+    this.opts.interval = this.opts.interval == undefined ? 10 : this.opts.interval;
+    this.opts.freeze = this.opts.freeze || false;
+    
+    // for online project, will open this comment
+    // if ($.fn.agent.oldIE) {
+    //   this.opts.freeze = true;
+    // }
+
+    if (this.opts.freeze) {
+      this.opts.duration = 0;
+    }
+
+    // store the stage instance on Stage
+    Stage.instance = this;
+
     // handle each scene on the stage
     sceneClass = this.opts.sceneClass || 'scene';
     scenes = stage.find('.' + sceneClass);
@@ -731,9 +834,11 @@
     // setting the next and prev scenes
     this.scenes[0].stage = this;
     this.scenes[0].index = 0;
+
     for (i = 1, len = this.scenes.length; i < len; i++) {
       this.scenes[i].index = i;
       this.scenes[i].stage = this;
+      // link all scenes
       if (i >= 1) {
         this.scenes[i-1].next(this.scenes[i]);
         this.scenes[i].prev(this.scenes[i-1]);
@@ -855,7 +960,7 @@
       // if the target scene is the current one
       // or index is negative
       // or index is larger than scenes' count, directly return
-      if (index === cur.index) {
+      if (index === cur.index || index < 0 || index >= len) {
         return false;
       } else {
         scenes[index].play('next');

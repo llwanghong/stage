@@ -202,17 +202,15 @@
       line-height : 180px;
       background  : ivory;
     }
-
-    .rY { transform: rotate(25deg); }
   </style>
 </head>
 <body>
-  <div id="stage" animate-opts='{"loop": true, "noload": true}'>
+  <div id="stage" animate-opts='{"loop": true, "noload": true, duration: 800, showIntervals: true}'>
     <div id="scene1" class="scene">
       <span>Scene1</span>
-      <section class="actor actor1" animate-opts='{rotate: -540, scaleX: -1.5, scaleY: -1.5, translateY: 200, "effect": {"default": "Back.easeOut"}, duration: 800}'>Actor1</section>
+      <section class="actor actor1" animate-opts='{"translateY": 200, rotate: -900, zoomIn: true, "fadeIn":true, "duration": 1000,"effect": {"default":"Quart.easeOut", "rotate":"Back.easeOut"}}'>Actor1</section>
     </div>
-    <div id="scene2" class="scene" animate-opts='{"dir": "l2r"}'>
+    <div id="scene2" class="scene">
       <span>Scene2</span>
       <section class="actor actor1" animate-opts='{fadeIn: true, dir: "b2t", duration: 450}'>Actor1</section>
       <section class="actor actor2" animate-opts='{"dir": "t2b", duration: 1000}'>Actor2</section>
@@ -224,15 +222,15 @@
       <section class="actor actor2" animate-opts='{"dir": "l2r", duration: 1000}'>Actor2</section>
       <section class="actor actor3" animate-opts='{translateY: 0, zoomIn: true, duration: 450, delay: 1300}'>Actor3</section>
     </div>
-    <div id="scene4" class="scene" animate-opts='{"dir": "b2t", "effect": "Bounce.easeOut", "replay": true}'>
+    <div id="scene4" class="scene">
       <span>Scene4</span>
-      <section class="actor actor1" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 500}'>Actor1</section>
-      <section class="actor actor2" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor2</section>
-      <section class="actor actor3" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor3</section>
-      <section class="actor actor4" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 500}'>Actor4</section>
-      <section class="actor actor5" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor5</section>
-      <section class="actor actor6" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor6</section>
-      <section class="actor actor7" animate-opts='{fadeIn: true, zoomIn: true, duration: 1000, delay: 2000, "effect": "Bounce.easeOut", endStyle: "rY"}'>Actor7</section>
+      <section class="actor actor1" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 0}'>Actor1</section>
+      <section class="actor actor2" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 300}'>Actor2</section>
+      <section class="actor actor3" animate-opts='{translateY: -150, fadeIn: true, dir: "t2b", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 600}'>Actor3</section>
+      <section class="actor actor4" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 1500}'>Actor4</section>
+      <section class="actor actor5" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 1200}'>Actor5</section>
+      <section class="actor actor6" animate-opts='{translateY: 150, fadeIn: true, dir: "b2t", "effect": {"default": "Bounce.easeOut", "opacity": "Linear"}, delay: 900}'>Actor6</section>
+      <section class="actor actor7" animate-opts='{fadeIn: true, zoomIn: true, duration: 1000, delay: 2000, "effect": "Bounce.easeOut"}'>Actor7</section>
     </div>
   </div>
 

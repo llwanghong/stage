@@ -513,7 +513,7 @@ var util = (function () {
     /* parse the existing animation properties */
     parseAnimateInfo: function () {
       var
-        opacity, transform, angle, sinAngle, cosAngle, match, reg,
+        opacity, transform, transform3d, angle, sinAngle, cosAngle, match, reg,
         translate, scale, rotate, translateX, translateY, scaleX, scaleY, deg2rad, rad2deg;
 
       opacity = parseFloat(this.css('opacity')) * 100 || 100;
@@ -570,9 +570,21 @@ var util = (function () {
             angle = parseFloat(match[match.length-1].match(/rotate\(([+-]?\d*\.?\d*)deg\)/)[1]);
           }
         } else {
-          transform = transform.match(/matrix\(([^\)]+)\)/)[1];
+          if (transform.match(/matrix3d\(([^\)]+)\)/)) {
+            transform = transform.match(/matrix3d\(([^\)]+)\)/)[1];
+            transform3d = transform.split(',');
+            transform    = [];
+            transform[0] = transform3d[0];
+            transform[1] = transform3d[4];
+            transform[2] = transform3d[1];
+            transform[3] = transform3d[5];
+            transform[4] = transform3d[2];
+            transform[5] = transform3d[6];
+          } else if (transform.match(/matrix\(([^\)]+)\)/)) {
+            transform = transform.match(/matrix\(([^\)]+)\)/)[1];
+            transform = transform.split(',');
+          }
           if (transform) {
-            transform  = transform.split(',');
             scaleX     = Math.sqrt(transform[0]*transform[0] + transform[1]*transform[1]);
             cosAngle   = parseFloat((transform[0] / scaleX).toFixed(4));
             sinAngle   = parseFloat((transform[1] / scaleX).toFixed(4));
@@ -854,7 +866,7 @@ var util = (function () {
         steo        = opts.steo || 1,
         isOneNumber = typeof from != "object" && typeof to != "object",
         eased       = 0, // animated step count
-        timerId     = -1;
+        timer       = {id: -1};
       
       if (isOneNumber) {
         from = parseInt(from);
@@ -891,7 +903,7 @@ var util = (function () {
 
 
       (function _animate() {
-        timerId = window.setTimeout(function () {
+        timer.id = window.setTimeout(function () {
           var
             vObj    = {},
             key     = "",
@@ -919,8 +931,8 @@ var util = (function () {
             eased += steo;
             _animate();
           } else {
-            window.clearTimeout(timerId);
-            timerId = -1;
+            window.clearTimeout(timer.id);
+            timer.id = -1;
             if (opts.completeFn) {
               opts.completeFn();
             }
@@ -928,7 +940,7 @@ var util = (function () {
         }, interval);
       })();
 
-      return timerId;
+      return timer;
     }
   });
 
